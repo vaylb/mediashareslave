@@ -1,0 +1,45 @@
+#include <string.h>
+#include <jni.h>
+#include "JNIHelp.h"
+#include <stdlib.h>
+#include <utils/Log.h>
+#include "android_runtime/Log.h"
+#include "android_runtime/AndroidRuntime.h"
+
+#include <sys/resource.h>
+#include "VideoShare.h"
+
+using namespace android;
+
+sp<VideoShare> mVideoShare;
+
+void android_vaylb_SlavePlay_setupVideoPlay(JNIEnv *env, jclass clazz) {
+	if(mVideoShare == NULL) mVideoShare = new VideoShare();
+	mVideoShare->setUpReceiver();
+}
+
+static JNINativeMethod gMethods[] = { 
+		{ "native_setupVideoPlay", "()V", (void*) android_vaylb_SlavePlay_setupVideoPlay },
+};
+
+static int register_android_vaylb_VideoShareSlave(JNIEnv *env) {
+	return AndroidRuntime::registerNativeMethods(env, "com/pzhao/slave/SlavePlay",
+			gMethods, NELEM(gMethods));
+}
+
+JNIEXPORT jint JNI_OnLoad(JavaVM *jvm, void *reserved) {
+	JNIEnv *e;
+	int status;
+	if (jvm->GetEnv((void**) &e, JNI_VERSION_1_6) != JNI_OK) {
+		return JNI_ERR;
+	}
+	ALOGE("vaylb_test-->JNI: jni_onload().");
+	if ((status = register_android_vaylb_VideoShareSlave(e)) < 0) {
+		ALOGE("vaylb-->jni Mainactivity registration failure, status: %d", status);
+		return JNI_ERR;
+	}
+
+	return JNI_VERSION_1_6;
+}
+
+

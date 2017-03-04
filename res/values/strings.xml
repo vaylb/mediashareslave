@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">MediaShareSlave</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+   <string name="app_name1">多媒体协同播放系统</string>
+     <string name="author">南京邮电大学项目组</string>
+    <string name="wifi">Wifi</string>
+     <string name="init">Init</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+    <string name="seekbar_text">动态调整播放时延</string>
+	<string name="seekbar_number">0ms</string>
+
+</resources>

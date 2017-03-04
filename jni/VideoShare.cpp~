@@ -1,0 +1,90 @@
+
+#define LOG_TAG "VideoShare"
+
+#include <sys/resource.h>
+#include <binder/IPCThreadState.h>
+#include <utils/Log.h>
+#include <sys/atomics.h>
+#include <time.h>
+#include <utils/Trace.h>
+#include <cutils/properties.h>
+
+#include <gui/VideoShare.h>
+
+
+namespace android {
+
+VideoShare::VideoShare(/*sp<BufferQueue> bufferQueue*/)
+	:Thread(false /*canCallJava*/)
+{
+	ALOGE("vaylb_test-->Slave VideoShare construct.");
+}
+
+VideoShare::~VideoShare()
+{
+	ALOGE("vaylb_test-->Slave VideoShare destruct.");
+	//mBufferQueue.clear();
+	//mBufferQueue = NULL;
+}
+
+bool VideoShare::threadLoop()
+{
+	ALOGE("vaylb_test-->Slave VideoShare::threadLoop.");
+	while (!exitPending())
+    {	
+		/*	
+		Mutex::Autolock _l(mLock);
+		mDataTransfer.wait(mLock);
+		ALOGE("vaylb-->VideoShare threadloop index = %d",mIndex);
+		
+		long sleepNs = 10000000; //10ms
+		const struct timespec req = {0, sleepNs};
+        nanosleep(&req, NULL);
+        */
+		char index_ch[4];
+		ALOGE("vaylb-->Slave VideoShare server waiting.");
+		mClientAddrLen = sizeof(mClientAddress);
+		mClientSocketFd = accept(mServerSocketFd,(struct sockaddr*)&mClientAddress,mClientAddrLen);
+		read(mClientSocketFd,index_ch,sizeof(index_ch));
+		int index = -1;
+		memcpy(&index, index_ch, 4);
+		ALOGE("vaylb-->Slave VideoShare gto from client index = %d",index);
+		close(mClientSocketFd);
+    }
+	
+	ALOGE("vaylb_test-->VideoShare::threadLoop end.");
+    return false;
+}
+
+status_t VideoShare::setUpReceiver(){
+	ALOGE("vaylb-->Slave VideoShare setUpReceiver");
+	mServerSocketFd = socket(AF_INET,SOCK_STREAM,0);
+	mServerAddress.sin_addr.s_addr = htonl(INADDR_ANY);
+	mServerAddress.sin_port = htons(10086);
+	mServerAddrLen = sizeof(mServerAddress);
+	bind(mServerSocketFd,(struct sockaddr*)&mServerAddress,mServerAddrLen);
+	listen(mServerSocketFd,5);
+	threadLoop_run();
+	return NO_ERROR;
+}
+
+/*
+void VideoShare::signalToDataTransfer(int index){
+	Mutex::Autolock _l(mLock);
+	mIndex = index;
+	mDataTransfer.signal();
+}
+*/
+
+void VideoShare::threadLoop_run(){
+	ALOGE("vaylb_test-->VideoShare::threadLoop_run.");
+	run("VideoShareThread", PRIORITY_URGENT_DISPLAY);
+}
+
+void VideoShare::threadLoop_exit(){
+	ALOGE("vaylb_test-->close VideoShare threadloop.");
+	this->requestExit();
+	this->requestExitAndWait();
+}
+
+}; // namespace android

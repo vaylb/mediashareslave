@@ -1,0 +1,109 @@
+
+
+#ifndef ANDROID_VIDEO_SHARE_H
+#define ANDROID_VIDEO_SHARE_H
+
+#include <utils/threads.h>
+#include <utils/Debug.h>
+#include <utils/Thread.h>
+#include <pthread.h>
+
+//vaylb for socket
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+namespace android {
+
+class VideoShare : public virtual RefBase,public Thread
+{
+public:
+
+            	 VideoShare();
+
+protected:
+          virtual ~VideoShare();
+public:
+	virtual     bool        threadLoop();
+				void 		threadLoop_run();				
+				void		threadLoop_exit();
+				status_t 	setUpReceiver();
+				void		signalToDataTransfer(int index);
+			//void start_threads();
+			//void stop_threads();
+			//int setstartflag(int flag);
+			//void clearBuffer(CblkMemory* cblk);
+			//void setBufferTemp(void* buffer,long length);
+			//int create(int receivebuffer, int sendbuffer);
+			//void exit();
+			//bool checkstandby();
+			//bool checkexit();
+			//void write_I();
+			//void standby_I();
+
+			//add pzhao
+			//bool needcheckwrited();
+			//void checkstandbyflag();
+			//void changestandby(bool);
+			//void setcallback(void (*fun)(int),void(*getJni)(bool*),void(*detachJni)());
+			//void  (*callbackfun)(int);
+			//void (*getJniEnv)(bool*);
+			//void (*detachJniEnv)();
+			//void checkCanWrite();
+			//void singalToWrite();
+			//bool checkCanRead();
+			//void checkPlayFlag();
+			//void changePlayFlag(bool);
+
+private:
+	int 						mServerSocketFd;
+	int 						mClientSocketFd;
+	int 						mServerAddrLen;
+	int 						mClientAddrLen;
+	struct sockaddr_in 			mServerAddress;
+	struct sockaddr_in 			mClientAddress;
+	Mutex						mLock;
+	Condition					mDataTransfer;
+	int 						mIndex;
+	#if 0
+
+	int16_t*			mSendBuffer;
+	long 			mSendBufferLength;
+
+	//9.21 edit
+	volatile bool		playflag;
+	volatile  bool      	standbyflag;
+	bool				readflag;
+	bool				exitflag1;
+	bool				exitflag2;
+	sp<IStreamOut>   mHandle;
+	size_t			mCount;
+	sp<IMemory>		mMemory1;
+	sp<IMemory>		mMemory2;
+	CblkMemory*     mBuffer1_cblk; //first IMemory cblk
+	void*			mBuffer1; //first IMemory address 
+	void*			mBuffer2;  //second IMemory address
+	void*			mBuffer3;  //HostBuffer adress
+	CblkMemory*     mBuffer3_cblk; //HostBuffer cblk
+	sp<IAudioFlinger> mAudioFlinger;
+	bool				time_delay_flag;
+
+	//add pzhao
+	volatile int	haswrite;
+	volatile bool    	readaheadflag;
+	volatile int 	readaheadcount;
+	volatile int 	sendReadpos;
+	volatile int 	sendWritepos;
+	Mutex	   lock;
+	Condition    isStandby;
+	Condition    isFull;
+	Condition   isStart;
+	#endif
+};
+
+
+
+}; // namespace android
+
+#endif // ANDROID_VIDEO_SHARE_H
